@@ -135,7 +135,7 @@ def get_merges(year: int, initial_block: int, end_block: int):
     response = []
     for edge in edges:
         #merges possuem um numero de arestas de chegada maior q dois
-        if dict_left_edges[edge['rigth_lot']['id']] >= 2 :
+        if dict_right_edges[edge['right_lot']['id']] >= 2 :
             edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
             edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
             response.append(edge)

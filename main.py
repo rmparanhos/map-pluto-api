@@ -93,7 +93,7 @@ def get_splits(year: int, initial_block: int, end_block: int):
     response = []
     for edge in edges:
         #splits possuem um numero de arestas de saida maior q dois
-        if dict_left_edges[edge['left_lot']['id']] >= 2 :
+        if dict_left_edges[edge['left_lot']['id']] >= 2 and dict_right_edges[edge['right_lot']['id']] == 1:
             edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
             edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
             response.append(edge)
@@ -135,14 +135,14 @@ def get_merges(year: int, initial_block: int, end_block: int):
     response = []
     for edge in edges:
         #merges possuem um numero de arestas de chegada maior q dois
-        if dict_right_edges[edge['right_lot']['id']] >= 2 :
+        if dict_left_edges[edge['left_lot']['id']] == 1 and dict_right_edges[edge['right_lot']['id']] >= 2:
             edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
             edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
             response.append(edge)
     return response    
 
-@app.get("/nxm/{year}/{initial_block}/{end_block}")
-def get_nxm(year: int, initial_block: int, end_block: int):
+@app.get("/rearrange/{year}/{initial_block}/{end_block}")
+def get_rearrange(year: int, initial_block: int, end_block: int):
 
     block_list = range(initial_block, end_block+1)
     query_string = f"MATCH (n:Lot{year})-[r:INTERSECTION]->(m) WHERE n.Block in {[str(block) for block in block_list]} RETURN n,r,m"
@@ -175,7 +175,10 @@ def get_nxm(year: int, initial_block: int, end_block: int):
 
     response = []
     for edge in edges:
-        #mn sao merges e splits simultaneamente  possuem um numero de arestas de chegada maior q dois
+        #nxm possuem um numero de arestas de chegada e saida maior q dois
+        print('----')
+        print(dict_right_edges[edge['right_lot']['id']])
+        print(dict_left_edges[edge['left_lot']['id']])
         if dict_right_edges[edge['right_lot']['id']] >= 2 and dict_left_edges[edge['left_lot']['id']] >= 2:
             edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
             edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]

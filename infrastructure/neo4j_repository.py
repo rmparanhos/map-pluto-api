@@ -1,6 +1,6 @@
 from neo4j import GraphDatabase
 
-class Neo4jConnector:
+class Neo4jRepository:
     
     def __init__(self, uri, user, pwd):
         self.__uri = uri

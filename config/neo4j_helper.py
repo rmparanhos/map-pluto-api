@@ -1,6 +1,6 @@
 from neo4j import GraphDatabase
 
-class Neo4jRepository:
+class Neo4jHelper:
     
     def __init__(self, uri, user, pwd):
         self.__uri = uri
@@ -29,3 +29,4 @@ class Neo4jRepository:
             if session is not None:
                 session.close()
         return response
+

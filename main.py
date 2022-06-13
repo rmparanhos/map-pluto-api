@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -18,12 +19,13 @@ def hello_world():
     return {"Hello": "World"}
 
 from domain.edge_service import EdgeService
+from infrastructure.data.filter import Filter
 
 edge_service = EdgeService()
 
-@app.get("/edges/{year}/{block}")
-def get_edges(year: int, block: int):
-    return edge_service.get_edges(year, block)
+@app.post("/edges/{year}/{initial_block}/{end_block}")
+def get_edges(year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+    return edge_service.get_edges(year, initial_block, end_block, filter_list)
 
 @app.get("/splits/{year}/{initial_block}/{end_block}")
 def get_splits(year: int, initial_block: int, end_block: int):

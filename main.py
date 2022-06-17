@@ -39,5 +39,3 @@ def get_merges(year: int, initial_block: int, end_block: int):
 def get_rearranges(year: int, initial_block: int, end_block: int):
     return edge_service.get_rearranges(year, initial_block, end_block)
 
-
-#git teste

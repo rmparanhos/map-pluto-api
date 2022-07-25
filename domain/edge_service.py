@@ -1,7 +1,7 @@
 from typing import List
-from infrastructure.edge_repository import EdgeRepository
 from collections import Counter
 
+from infrastructure.edge_repository import EdgeRepository
 from infrastructure.data.filter import Filter
 
 class EdgeService:
@@ -43,12 +43,12 @@ class EdgeService:
             edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
         return edges
 
-    def get_splits(self, year: int, initial_block: int, end_block: int):
+    def get_splits(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
 
         edges = []
         left_edges = []
         right_edges = []
-        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block):
+        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, filter_list):
             left_lot = {"id" : record['r'].nodes[0].id}
             left_edges.append(record['r'].nodes[0].id)
 
@@ -80,12 +80,12 @@ class EdgeService:
                 response.append(edge)
         return response
 
-    def get_merges(self, year: int, initial_block: int, end_block: int):
+    def get_merges(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
        
         edges = []
         left_edges = []
         right_edges = []
-        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block):
+        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, filter_list):
             left_lot = {"id" : record['r'].nodes[0].id}
             left_edges.append(record['r'].nodes[0].id)
 
@@ -117,12 +117,12 @@ class EdgeService:
                 response.append(edge)
         return response 
 
-    def get_rearranges(self, year: int, initial_block: int, end_block: int):
+    def get_rearranges(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
          
         edges = []
         left_edges = []
         right_edges = []
-        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block):
+        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, filter_list):
             left_lot = {"id" : record['r'].nodes[0].id}
             left_edges.append(record['r'].nodes[0].id)
 

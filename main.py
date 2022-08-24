@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import datetime
 
 app = FastAPI()
 
@@ -23,19 +24,47 @@ edge_service = EdgeService()
 def hello_world():
     return {"Hello": "World"}
 
-@app.post("/edges/{year}/{initial_block}/{end_block}")
-def get_edges(year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
-    return edge_service.get_edges(year, initial_block, end_block, filter_list)
+@app.post("/edges/{initial_year}/{end_year}/{initial_block}/{end_block}")
+def get_edges(initial_year: int, end_year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+    if initial_year == end_year or initial_year+1 == end_year: return edge_service.get_edges(initial_year, initial_block, end_block, filter_list)
+    
+    resp = []
+    for year in range(initial_year, end_year):
+        resp = resp + edge_service.get_edges(year, initial_block, end_block, filter_list)
+    return resp
 
-@app.post("/splits/{year}/{initial_block}/{end_block}")
-def get_splits(year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
-    return edge_service.get_splits(year, initial_block, end_block, filter_list)
+@app.post("/splits/{initial_year}/{end_year}/{initial_block}/{end_block}")
+def get_splits(initial_year: int, end_year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+    if initial_year == end_year or initial_year+1 == end_year: return edge_service.get_splits(initial_year, initial_block, end_block, filter_list)
+    
+    resp = []
+    for year in range(initial_year, end_year):
+        t = datetime.datetime.now()
+        resp = resp + edge_service.get_splits(year, initial_block, end_block, filter_list)
+        print(datetime.datetime.now()-t)
+    
+    bbls = []
+    for edge in resp:     
+        if edge['left_lot']['BBL'] not in bbls: bbls.append(edge['left_lot']['BBL'])
+        if edge['right_lot']['BBL'] not in bbls: bbls.append(edge['right_lot']['BBL'])
+    print(bbls)
+  
+    return resp
 
-@app.post("/merges/{year}/{initial_block}/{end_block}")
-def get_merges(year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
-    return edge_service.get_merges(year, initial_block, end_block, filter_list)
+@app.post("/merges/{initial_year}/{end_year}/{initial_block}/{end_block}")
+def get_merges(initial_year: int, end_year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+    if initial_year == end_year or initial_year+1 == end_year: return edge_service.get_merges(initial_year, initial_block, end_block, filter_list)
+    
+    resp = []
+    for year in range(initial_year, end_year):
+        resp = resp + edge_service.get_merges(year, initial_block, end_block, filter_list)
+    return resp
 
-@app.post("/rearranges/{year}/{initial_block}/{end_block}")
-def get_rearranges(year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
-    return edge_service.get_rearranges(year, initial_block, end_block, filter_list)
-
+@app.post("/get_rearrange/{initial_year}/{end_year}/{initial_block}/{end_block}")
+def get_rearranges(initial_year: int, end_year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+    if initial_year == end_year or initial_year+1 == end_year: return edge_service.get_rearranges(initial_year, initial_block, end_block, filter_list)
+    
+    resp = []
+    for year in range(initial_year, end_year):
+        resp = resp + edge_service.get_rearranges(year, initial_block, end_block, filter_list)
+    return resp

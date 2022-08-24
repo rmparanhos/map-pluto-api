@@ -8,6 +8,7 @@ class EdgeService:
 
     def __init__(self) -> None:
         self.edge_repository = EdgeRepository()
+        self.intersect_attribute = ['area','areaA','areaB']
         pass
 
     def get_edges(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
@@ -74,7 +75,7 @@ class EdgeService:
         response = []
         for edge in edges:
             #splits possuem um numero de arestas de saida maior q dois
-            if dict_left_edges[edge['left_lot']['id']] >= 2 and dict_right_edges[edge['right_lot']['id']] == 1:
+            if dict_left_edges[edge['left_lot']['id']] >= 2: #and dict_right_edges[edge['right_lot']['id']] == 1:
                 edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
                 edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
                 response.append(edge)
@@ -111,7 +112,7 @@ class EdgeService:
         response = []
         for edge in edges:
             #merges possuem um numero de arestas de chegada maior q dois
-            if dict_left_edges[edge['left_lot']['id']] == 1 and dict_right_edges[edge['right_lot']['id']] >= 2:
+            if dict_right_edges[edge['right_lot']['id']] >= 2: #and dict_left_edges[edge['left_lot']['id']] == 1:
                 edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
                 edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
                 response.append(edge)
@@ -160,10 +161,6 @@ class EdgeService:
                     rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
                 rearrange_bbl.append(edge['left_lot']['YearBBL'])
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
-        for item in rearrange_edges:
-            print(item['left_lot']['LotArea'])
-            print(item['right_lot']['LotArea'])
-            print('----')
         
         #voltando nos splits e merges para capturar toda a participacao do rearranjo
         splits = self.get_splits(year, initial_block, end_block, [])
@@ -196,13 +193,24 @@ class EdgeService:
 
     def filter_edge(self, edge, filter_list):
         for filter in filter_list:
-            result = {
-                '>': lambda attribute, value: edge['left_lot'][attribute] > value or edge['right_lot'][attribute] > value,
-                '<': lambda attribute, value: edge['left_lot'][attribute] < value or edge['right_lot'][attribute] < value,
-                '>=': lambda attribute, value: edge['left_lot'][attribute] >= value or edge['right_lot'][attribute] >= value,
-                '<=': lambda attribute, value: edge['left_lot'][attribute] <= value or edge['right_lot'][attribute] <= value,
-                '=': lambda attribute, value: edge['left_lot'][attribute] == value or edge['right_lot'][attribute] == value,
-                '<>': lambda attribute, value: edge['left_lot'][attribute] != value or edge['right_lot'][attribute] != value,
-                }[filter.operand](filter.attribute, filter.value)
-            if not result: return False
+            if filter.attribute not in self.intersect_attribute:
+                result = {
+                    '>': lambda attribute, value: edge['left_lot'][attribute] > value or edge['right_lot'][attribute] > value,
+                    '<': lambda attribute, value: edge['left_lot'][attribute] < value or edge['right_lot'][attribute] < value,
+                    '>=': lambda attribute, value: edge['left_lot'][attribute] >= value or edge['right_lot'][attribute] >= value,
+                    '<=': lambda attribute, value: edge['left_lot'][attribute] <= value or edge['right_lot'][attribute] <= value,
+                    '=': lambda attribute, value: edge['left_lot'][attribute] == value or edge['right_lot'][attribute] == value,
+                    '<>': lambda attribute, value: edge['left_lot'][attribute] != value or edge['right_lot'][attribute] != value,
+                    }[filter.operand](filter.attribute, filter.value)
+                if not result: return False
+            else:
+                result = {
+                    '>': lambda attribute, value: edge['intersection'][attribute] > value,
+                    '<': lambda attribute, value: edge['intersection'][attribute] < value,
+                    '>=': lambda attribute, value: edge['intersection'][attribute] >= value,
+                    '<=': lambda attribute, value: edge['intersection'][attribute] <= value,
+                    '=': lambda attribute, value: edge['intersection'][attribute] == value,
+                    '<>': lambda attribute, value: edge['intersection'][attribute] != value,
+                    }[filter.operand](filter.attribute, filter.value)
+                if not result: return False    
         return True               

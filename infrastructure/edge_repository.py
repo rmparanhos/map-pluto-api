@@ -28,3 +28,14 @@ class EdgeRepository:
         print(query_string)
         return self.neo4j_conn.query(query_string, db='neo4j')
 
+    def get_edges_by_bbl(self, bbl_list: List[int], initial_year: int, end_year: int):
+        year_list = range(initial_year, end_year+1)
+        query_string = f"MATCH (n)-[r:INTERSECTION]->(m) WHERE n.BBL in {[bbl for bbl in bbl_list]}"
+        years_string = ""
+        for year in year_list:
+            years_string += "n:Lot" + str(year) + " OR "
+        years_string = years_string[:-3]
+        query_string += f" AND ({years_string})" 
+        query_string += " RETURN n,r,m"
+        print(query_string)
+        return self.neo4j_conn.query(query_string, db='neo4j')

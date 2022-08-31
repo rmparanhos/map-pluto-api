@@ -11,7 +11,7 @@ class EdgeService:
         self.intersect_attribute = ['area','areaA','areaB']
         pass
 
-    def get_edges(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+    def get_edges_by_blocklist(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
     
         edges = []
         left_edges = []
@@ -213,4 +213,36 @@ class EdgeService:
                     '<>': lambda attribute, value: edge['intersection'][attribute] != value,
                     }[filter.operand](filter.attribute, filter.value)
                 if not result: return False    
-        return True               
+        return True
+
+    def get_edges_by_bbl(self, bbl_list: List[int], initial_year: int, end_year: int):
+        edges = []
+        left_edges = []
+        right_edges = []
+        for record in self.edge_repository.get_edges_by_bbl(bbl_list, initial_year, end_year):
+            left_lot = {"id" : record['r'].nodes[0].id}
+            left_edges.append(record['r'].nodes[0].id)
+
+            for item in record['r'].nodes[0].items():
+                left_lot[item[0]] = item[1]
+            
+            intersection = {"id" : record['r'].id}
+            for item in record['r'].items():
+                intersection[item[0]] = item[1]
+            
+            right_lot = {"id" : record['r'].nodes[1].id}
+            right_edges.append(record['r'].nodes[1].id)
+            for item in record['r'].nodes[1].items():
+                right_lot[item[0]] = item[1]
+            
+            edge = {'left_lot':left_lot, 'intersection': intersection, 'right_lot':right_lot}
+            edges.append(edge)
+
+    
+        dict_left_edges = dict(Counter(left_edges))
+        dict_right_edges = dict(Counter(right_edges))
+
+        for edge in edges:
+            edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
+            edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
+        return edges               

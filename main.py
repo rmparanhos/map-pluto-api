@@ -97,4 +97,8 @@ def get_edges_as_prov(initial_year: int, end_year: int, initial_block: int, end_
     for year in range(initial_year, end_year):
         merges = merges + edge_service.get_merges(year, initial_block, end_block, filter_list)
     
-    return prov_service.convert_to_prov_json(resp,merges)
+    splits = []
+    for year in range(initial_year, end_year):
+        splits = splits + edge_service.get_splits(year, initial_block, end_block, filter_list)
+    
+    return prov_service.convert_to_prov_json(resp,merges,splits)

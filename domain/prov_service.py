@@ -7,7 +7,7 @@ class ProvService:
     def __init__(self) -> None:
         pass
 
-    def convert_to_prov_json(self, edges: List[any], merges: List[any], splits: List[any]):
+    def convert_to_prov_json(self, edges: List[any], merges: List[any], splits: List[any], rearranges: List[any]):
         prov = {}
         prefix = {}
         prefix['xsd'] = "http://www.w3.org/2001/XMLSchema#"
@@ -33,8 +33,8 @@ class ProvService:
             prov['activity']["prov:Split" + str(split['left_lot']['id'])] = {}
             splits_left_lot_list.append(split['left_lot']['id'])
             splits_intersect_list.append(split['intersection']['id'])
-            
-                
+    
+           
         for edge in edges:
             prov['entity']["prov:" + str(edge['left_lot']['YearBBL'])] = {}
             prov['entity']["prov:" + str(edge['right_lot']['YearBBL'])] = {}
@@ -45,14 +45,13 @@ class ProvService:
                 wGBdict["prov:entity"] = "prov:" + str(edge['right_lot']['YearBBL'])
                 wGBdict["prov:activity"] = "prov:Merge" + str(edge['right_lot']['id'])
                 prov['wasGeneratedBy'][wGB] = wGBdict
-                
+ 
             if edge['intersection']['id'] in merges_intersect_list:                   
-                u = f"_:u{edge['left_lot']['id']}"
+                u = f"_:uMerge{edge['left_lot']['id']}"
                 udict = {}
                 udict["prov:activity"] = "prov:Merge" + str(edge['right_lot']['id'])
                 udict["prov:entity"] = "prov:" + str(edge['left_lot']['YearBBL'])
                 prov['used'][u] = udict
-                continue
            
             if edge['left_lot']['id'] in splits_left_lot_list:    
                 wGB = f"_:wGBSplit{edge['right_lot']['id']}"
@@ -62,17 +61,17 @@ class ProvService:
                 prov['wasGeneratedBy'][wGB] = wGBdict
                 
             if edge['intersection']['id'] in splits_intersect_list:   
-                u = f"_:u{edge['left_lot']['id']}"
+                u = f"_:uSplit{edge['left_lot']['id']}"
                 udict = {}
                 udict["prov:activity"] = "prov:Split" + str(edge['left_lot']['id'])
                 udict["prov:entity"] = "prov:" + str(edge['left_lot']['YearBBL'])
                 prov['used'][u] = udict               
-                continue
-            
-            wDF = f"_:wDF{edge['intersection']['id']}"
-            wDFdict = {}
-            wDFdict["prov:usedEntity"] = "prov:" + str(edge['left_lot']['YearBBL'])
-            wDFdict["prov:generatedEntity"] = "prov:" + str(edge['right_lot']['YearBBL'])
-            prov['wasDerivedFrom'][wDF] = wDFdict
+                
+            if edge['intersection']['id'] not in splits_intersect_list and edge['intersection']['id'] not in merges_intersect_list:  
+                wDF = f"_:wDF{edge['intersection']['id']}"
+                wDFdict = {}
+                wDFdict["prov:usedEntity"] = "prov:" + str(edge['left_lot']['YearBBL'])
+                wDFdict["prov:generatedEntity"] = "prov:" + str(edge['right_lot']['YearBBL'])
+                prov['wasDerivedFrom'][wDF] = wDFdict
         
         return prov

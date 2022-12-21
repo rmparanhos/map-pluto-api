@@ -101,8 +101,8 @@ def get_edges_as_prov(initial_year: int, end_year: int, initial_block: int, end_
     for year in range(initial_year, end_year):
         splits = splits + edge_service.get_splits(year, initial_block, end_block, filter_list)
     
-    rearranges = []
+    rearranges_ids = []
     for year in range(initial_year, end_year):
-        rearranges = rearranges + edge_service.get_rearranges(year, initial_block, end_block, filter_list)
+        rearranges_ids = rearranges_ids + edge_service.get_rearranges_ids(year, initial_block, end_block, filter_list)
     
-    return prov_service.convert_to_prov_json(resp,merges,splits,rearranges)
+    return prov_service.convert_to_prov_json(resp,merges,splits,rearranges_ids)

@@ -161,7 +161,7 @@ class EdgeService:
                     rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
                 rearrange_bbl.append(edge['left_lot']['YearBBL'])
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
-        
+
         #voltando nos splits e merges para capturar toda a participacao do rearranjo
         splits = self.get_splits(year, initial_block, end_block, [])
         for edge in splits:
@@ -245,4 +245,73 @@ class EdgeService:
         for edge in edges:
             edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
             edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
-        return edges               
+        return edges     
+              
+    def get_rearranges_ids(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+         
+        edges = []
+        left_edges = []
+        right_edges = []
+        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, []): #filter_list):
+            left_lot = {"id" : record['r'].nodes[0].id}
+            left_edges.append(record['r'].nodes[0].id)
+
+            for item in record['r'].nodes[0].items():
+                left_lot[item[0]] = item[1]
+            
+            intersection = {"id" : record['r'].id}
+            for item in record['r'].items():
+                intersection[item[0]] = item[1]
+            
+            right_lot = {"id" : record['r'].nodes[1].id}
+            right_edges.append(record['r'].nodes[1].id)
+            for item in record['r'].nodes[1].items():
+                right_lot[item[0]] = item[1]
+            
+            edge = {'left_lot':left_lot, 'intersection': intersection, 'right_lot':right_lot}
+            edges.append(edge)
+
+        dict_left_edges = dict(Counter(left_edges))
+        dict_right_edges = dict(Counter(right_edges))
+
+        rearrange_edges = []
+        rearrange_bbl = []
+        for edge in edges:
+            if dict_right_edges[edge['right_lot']['id']] >= 2 and dict_left_edges[edge['left_lot']['id']] >= 2:
+                edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
+                edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
+                if(self.filter_edge(edge,filter_list)):
+                    rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                rearrange_bbl.append(edge['left_lot']['YearBBL'])
+                rearrange_bbl.append(edge['right_lot']['YearBBL'])
+        
+        #voltando nos splits e merges para capturar toda a participacao do rearranjo
+        splits = self.get_splits(year, initial_block, end_block, [])
+        for edge in splits:
+            if (edge['left_lot']['YearBBL'] in rearrange_bbl or edge['right_lot']['YearBBL'] in rearrange_bbl):
+                rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                rearrange_bbl.append(edge['left_lot']['YearBBL'])
+                rearrange_bbl.append(edge['right_lot']['YearBBL'])
+
+        merges = self.get_merges(year, initial_block, end_block, [])
+        for edge in merges:
+            if (edge['left_lot']['YearBBL'] in rearrange_bbl or edge['right_lot']['YearBBL'] in rearrange_bbl):
+                rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                rearrange_bbl.append(edge['left_lot']['YearBBL'])
+                rearrange_bbl.append(edge['right_lot']['YearBBL'])
+        
+        print(year)
+        rearrange_ids = {}
+        for item in rearrange_edges:
+            if item['left_lot']['YearBBL'] in rearrange_ids:
+               rearrange_ids[item['right_lot']['YearBBL']] = rearrange_ids[item['left_lot']['YearBBL']]
+            if item['right_lot']['YearBBL'] in rearrange_ids:
+               rearrange_ids[item['left_lot']['YearBBL']] = rearrange_ids[item['right_lot']['YearBBL']]
+               continue
+            rearrange_ids[item['left_lot']['YearBBL']] = item['intersection']['id']
+            rearrange_ids[item['right_lot']['YearBBL']] = item['intersection']['id']
+            print(item['left_lot']['YearBBL'])
+            print(item['intersection']['id'])
+            print(item['right_lot']['YearBBL'])
+        print(rearrange_ids)
+        return rearrange_edges

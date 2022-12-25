@@ -35,17 +35,16 @@ class ProvService:
             splits_intersect_list.append(split['intersection']['id'])
             
         for edge in edges:
-            is_merge = False
             prov['entity']["prov:" + str(edge['left_lot']['YearBBL'])] = {}
             prov['entity']["prov:" + str(edge['right_lot']['YearBBL'])] = {}
             
+            ##Merges
             if edge['right_lot']['id'] in merges_right_lot_list:   
                 wGB = f"_:wGBMerge_{edge['right_lot']['id']}"
                 wGBdict = {}
                 wGBdict["prov:entity"] = "prov:" + str(edge['right_lot']['YearBBL'])
                 wGBdict["prov:activity"] = "prov:Merge" + str(edge['right_lot']['id'])
                 prov['wasGeneratedBy'][wGB] = wGBdict
-                is_merge = False
             
             if edge['intersection']['id'] in merges_intersect_list:                   
                 u = f"_:uMerge_{edge['left_lot']['id']}_{edge['intersection']['id']}"
@@ -53,22 +52,15 @@ class ProvService:
                 udict["prov:activity"] = "prov:Merge" + str(edge['right_lot']['id'])
                 udict["prov:entity"] = "prov:" + str(edge['left_lot']['YearBBL'])
                 prov['used'][u] = udict
-                is_merge = False
            
+            ##splits
             if edge['left_lot']['id'] in splits_left_lot_list:    
                 wGB = f"_:wGBSplit_{edge['right_lot']['id']}_{edge['intersection']['id']}"
                 wGBdict = {}
                 wGBdict["prov:entity"] = "prov:" + str(edge['right_lot']['YearBBL'])
                 wGBdict["prov:activity"] = "prov:Split" + str(edge['left_lot']['id'])
                 prov['wasGeneratedBy'][wGB] = wGBdict
-                if is_merge:
-                    wGB = f"_:wGBRearrange_{edge['right_lot']['id']}_{edge['intersection']['id']}"
-                    wGBdict = {}
-                    wGBdict["prov:entity"] = "prov:" + str(edge['right_lot']['YearBBL'])
-                    wGBdict["prov:activity"] = "prov:Rearrange" + str(edge['left_lot']['id'])
-                    prov['wasGeneratedBy'][wGB] = wGBdict
-                    prov['wasGeneratedBy'].pop(f"_:wGBSplit_{edge['right_lot']['id']}_{edge['intersection']['id']}")
-                    prov['wasGeneratedBy'].pop(f"_:wGBMerge_{edge['right_lot']['id']}")     
+                
                 
             if edge['intersection']['id'] in splits_intersect_list:   
                 u = f"_:uSplit_{edge['left_lot']['id']}"
@@ -76,16 +68,39 @@ class ProvService:
                 udict["prov:activity"] = "prov:Split" + str(edge['left_lot']['id'])
                 udict["prov:entity"] = "prov:" + str(edge['left_lot']['YearBBL'])
                 prov['used'][u] = udict
-                if is_merge:
-                    prov['activity']["prov:Rearrange" + str(edge['left_lot']['id'])] = {}
-                    u = f"_:uRearrange_{edge['left_lot']['id']}"
-                    udict = {}
-                    udict["prov:activity"] = "prov:Rearrange" + str(edge['left_lot']['id'])
-                    udict["prov:entity"] = "prov:" + str(edge['left_lot']['YearBBL'])
-                    prov['used'][u] = udict
-                    prov['used'].pop(f"_:uSplit_{edge['left_lot']['id']}")
-                    prov['used'].pop(f"_:uMerge_{edge['left_lot']['id']}_{edge['intersection']['id']}")                 
+                             
+            
+            ##rearranges
+            if edge['left_lot']['YearBBL'] in rearranges[str(edge['left_lot']['Year']) + str(edge['left_lot']['Year']+1)]:
+                u = f"_:uRearrange_{edge['left_lot']['id']}"
+                udict = {}
+                udict["prov:activity"] = "prov:Rearrange" + str(rearranges[str(edge['left_lot']['Year']) + str(edge['left_lot']['Year']+1)][edge['left_lot']['YearBBL']])
+                udict["prov:entity"] = "prov:" + str(edge['left_lot']['YearBBL'])
+                prov['used'][u] = udict
                 
+                if f"_:uMerge_{edge['left_lot']['id']}_{edge['intersection']['id']}" in prov['used']:
+                    prov['activity'].pop(prov['used'][f"_:uMerge_{edge['left_lot']['id']}_{edge['intersection']['id']}"]['prov:activity'], None)
+                if f"_:uSplit_{edge['left_lot']['id']}" in prov['used']:
+                    prov['activity'].pop(prov['used'][f"_:uSplit_{edge['left_lot']['id']}"]['prov:activity'], None)
+                prov['used'].pop(f"_:uMerge_{edge['left_lot']['id']}_{edge['intersection']['id']}", None)
+                prov['used'].pop(f"_:uSplit_{edge['left_lot']['id']}", None)
+
+            if edge['right_lot']['YearBBL'] in rearranges[str(edge['right_lot']['Year']-1) + str(edge['right_lot']['Year'])]:
+                wGB = f"_:wGBRearrange_{edge['right_lot']['id']}"
+                wGBdict = {}
+                wGBdict["prov:entity"] = "prov:" + str(edge['right_lot']['YearBBL'])
+                wGBdict["prov:activity"] = "prov:Rearrange"  + str(rearranges[str(edge['right_lot']['Year']-1) + str(edge['right_lot']['Year'])][edge['right_lot']['YearBBL']])
+                prov['wasGeneratedBy'][wGB] = wGBdict
+                
+                if f"_:wGBMerge_{edge['right_lot']['id']}" in prov['wasGeneratedBy']:
+                    prov['activity'].pop(prov['wasGeneratedBy'][f"_:wGBMerge_{edge['right_lot']['id']}"]['prov:activity'], None)
+                if f"_:wGBSplit_{edge['right_lot']['id']}_{edge['intersection']['id']}" in prov['wasGeneratedBy']:
+                    prov['activity'].pop(prov['wasGeneratedBy'][f"_:wGBSplit_{edge['right_lot']['id']}_{edge['intersection']['id']}"]['prov:activity'], None)
+                prov['wasGeneratedBy'].pop(f"_:wGBMerge_{edge['right_lot']['id']}", None)
+                prov['wasGeneratedBy'].pop(f"_:wGBSplit_{edge['right_lot']['id']}_{edge['intersection']['id']}", None)
+        
+            
+            ##maintain    
             if edge['intersection']['id'] not in splits_intersect_list and edge['intersection']['id'] not in merges_intersect_list:
                 prov['activity']["prov:Maintain" + str(edge['left_lot']['id'])] = {}
                 wGB = f"_:wGBMaintain_{edge['left_lot']['id']}"
@@ -97,11 +112,11 @@ class ProvService:
                 udict = {}
                 udict["prov:activity"] = "prov:Maintain" + str(edge['left_lot']['id'])
                 udict["prov:entity"] = "prov:" + str(edge['left_lot']['YearBBL'])
-                prov['used'][u] = udict                 
-                #wDF = f"_:wDF{edge['intersection']['id']}"
-                #wDFdict = {}
-                #wDFdict["prov:usedEntity"] = "prov:" + str(edge['left_lot']['YearBBL'])
-                #wDFdict["prov:generatedEntity"] = "prov:" + str(edge['right_lot']['YearBBL'])
-                #prov['wasDerivedFrom'][wDF] = wDFdict
+                prov['used'][u] = udict       
         
+        for year in rearranges:
+            for rearrange in rearranges[year]:
+                prov['activity']["prov:Rearrange" + str(rearranges[year][rearrange])] = {}
+            
+            
         return prov

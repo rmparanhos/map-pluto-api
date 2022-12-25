@@ -246,9 +246,9 @@ class EdgeService:
             edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
             edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
         return edges     
+      
               
-    def get_rearranges_ids(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
-         
+    def get_rearranges_ids(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]): 
         edges = []
         left_edges = []
         right_edges = []
@@ -300,7 +300,6 @@ class EdgeService:
                 rearrange_bbl.append(edge['left_lot']['YearBBL'])
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
         
-        print(year)
         rearrange_ids = {}
         for item in rearrange_edges:
             if item['left_lot']['YearBBL'] in rearrange_ids:
@@ -310,8 +309,7 @@ class EdgeService:
                continue
             rearrange_ids[item['left_lot']['YearBBL']] = item['intersection']['id']
             rearrange_ids[item['right_lot']['YearBBL']] = item['intersection']['id']
-            print(item['left_lot']['YearBBL'])
-            print(item['intersection']['id'])
-            print(item['right_lot']['YearBBL'])
-        print(rearrange_ids)
-        return rearrange_edges
+            
+        return rearrange_ids
+    
+    

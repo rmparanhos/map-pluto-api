@@ -7,7 +7,7 @@ class ProvService:
     def __init__(self) -> None:
         pass
 
-    def convert_to_prov_json(self, edges: List[any], merges: List[any], splits: List[any], rearranges: List[any]):
+    def convert_to_prov_json(self, edges: List[any], merges: List[any], splits: List[any], rearranges: List[any], with_attributes=False):
         prov = {}
         prefix = {}
         prefix['xsd'] = "http://www.w3.org/2001/XMLSchema#"
@@ -23,14 +23,20 @@ class ProvService:
         merges_intersect_list = []
         merges_right_lot_list = []
         for merge in merges:
-            prov['activity']["prov:Merge" + str(merge['right_lot']['id'])] = {}
+            if with_attributes:
+                prov['activity']["prov:Merge" + str(merge['right_lot']['id'])] = {"prov:Year": merge['left_lot']['Year']}
+            else:
+                prov['activity']["prov:Merge" + str(merge['right_lot']['id'])] = {}
             merges_right_lot_list.append(merge['right_lot']['id'])
             merges_intersect_list.append(merge['intersection']['id'])
         
         splits_intersect_list = []
         splits_left_lot_list = []
         for split in splits:
-            prov['activity']["prov:Split" + str(split['left_lot']['id'])] = {}
+            if with_attributes:
+                prov['activity']["prov:Split" + str(split['left_lot']['id'])] = {"prov:Year": split['left_lot']['Year']}
+            else:
+                prov['activity']["prov:Split" + str(split['left_lot']['id'])] = {}
             splits_left_lot_list.append(split['left_lot']['id'])
             splits_intersect_list.append(split['intersection']['id'])
             
@@ -102,7 +108,10 @@ class ProvService:
             
             ##maintain    
             if edge['intersection']['id'] not in splits_intersect_list and edge['intersection']['id'] not in merges_intersect_list:
-                prov['activity']["prov:Maintain" + str(edge['left_lot']['id'])] = {}
+                if with_attributes:
+                    prov['activity']["prov:Maintain" + str(edge['left_lot']['id'])] = {"prov:Year": edge['left_lot']['Year']}
+                else:
+                    prov['activity']["prov:Maintain" + str(edge['left_lot']['id'])] = {}
                 wGB = f"_:wGBMaintain_{edge['left_lot']['id']}"
                 wGBdict = {}
                 wGBdict["prov:entity"] = "prov:" + str(edge['right_lot']['YearBBL'])
@@ -116,7 +125,9 @@ class ProvService:
         
         for year in rearranges:
             for rearrange in rearranges[year]:
-                prov['activity']["prov:Rearrange" + str(rearranges[year][rearrange])] = {}
-            
+                if with_attributes:
+                    prov['activity']["prov:Rearrange" + str(rearranges[year][rearrange])] = {"prov:Year": int(year[:-4])}
+                else:    
+                    prov['activity']["prov:Rearrange" + str(rearranges[year][rearrange])] = {}
             
         return prov

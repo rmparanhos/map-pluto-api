@@ -84,8 +84,8 @@ def get_rearranges(initial_year: int, end_year: int, initial_block: int, end_blo
     return edge_service.get_edges_by_bbl(bbls,initial_year,end_year)
 
 
-@app.post("/edges_as_prov/{initial_year}/{end_year}/{initial_block}/{end_block}")
-def get_edges_as_prov(initial_year: int, end_year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+@app.post("/edges_as_prov/{initial_year}/{end_year}/{initial_block}/{end_block}/{with_attributes}")
+def get_edges_as_prov(initial_year: int, end_year: int, initial_block: int, end_block: int, filter_list: List[Filter], with_attributes: bool):
     # Esta faltando o caso base quando o ano inicial é igual o ano final
     # if initial_year == end_year or initial_year+1 == end_year: return edge_service.get_edges_by_blocklist(initial_year, initial_block, end_block, filter_list)
     
@@ -105,4 +105,4 @@ def get_edges_as_prov(initial_year: int, end_year: int, initial_block: int, end_
     for year in range(initial_year, end_year):
         rearranges_ids[str(year)+str(year+1)] = edge_service.get_rearranges_ids(year, initial_block, end_block, filter_list)
     print(rearranges_ids)
-    return prov_service.convert_to_prov_json(resp,merges,splits,rearranges_ids)
+    return prov_service.convert_to_prov_json(resp,merges,splits,rearranges_ids,with_attributes=with_attributes)

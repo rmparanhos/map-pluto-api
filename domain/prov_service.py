@@ -7,7 +7,7 @@ class ProvService:
     def __init__(self) -> None:
         pass
 
-    def convert_to_prov_json(self, edges: List[any], merges: List[any], splits: List[any], rearranges: List[any], with_attributes=False):
+    def convert_to_prov_json(self, edges: List[any], merges: List[any], splits: List[any], rearranges: List[any], with_attributes=True, with_rearranges=True):
         prov = {}
         prefix = {}
         prefix['xsd'] = "http://www.w3.org/2001/XMLSchema#"
@@ -77,33 +77,34 @@ class ProvService:
                              
             
             ##rearranges
-            if edge['left_lot']['YearBBL'] in rearranges[str(edge['left_lot']['Year']) + str(edge['left_lot']['Year']+1)]:
-                u = f"_:uRearrange_{edge['left_lot']['id']}"
-                udict = {}
-                udict["prov:activity"] = "prov:Rearrange" + str(rearranges[str(edge['left_lot']['Year']) + str(edge['left_lot']['Year']+1)][edge['left_lot']['YearBBL']])
-                udict["prov:entity"] = "prov:" + str(edge['left_lot']['YearBBL'])
-                prov['used'][u] = udict
-                
-                if f"_:uMerge_{edge['left_lot']['id']}_{edge['intersection']['id']}" in prov['used']:
-                    prov['activity'].pop(prov['used'][f"_:uMerge_{edge['left_lot']['id']}_{edge['intersection']['id']}"]['prov:activity'], None)
-                if f"_:uSplit_{edge['left_lot']['id']}" in prov['used']:
-                    prov['activity'].pop(prov['used'][f"_:uSplit_{edge['left_lot']['id']}"]['prov:activity'], None)
-                prov['used'].pop(f"_:uMerge_{edge['left_lot']['id']}_{edge['intersection']['id']}", None)
-                prov['used'].pop(f"_:uSplit_{edge['left_lot']['id']}", None)
+            if(with_rearranges):
+                if edge['left_lot']['YearBBL'] in rearranges[str(edge['left_lot']['Year']) + str(edge['left_lot']['Year']+1)]:
+                    u = f"_:uRearrange_{edge['left_lot']['id']}"
+                    udict = {}
+                    udict["prov:activity"] = "prov:Rearrange" + str(rearranges[str(edge['left_lot']['Year']) + str(edge['left_lot']['Year']+1)][edge['left_lot']['YearBBL']])
+                    udict["prov:entity"] = "prov:" + str(edge['left_lot']['YearBBL'])
+                    prov['used'][u] = udict
+                    
+                    if f"_:uMerge_{edge['left_lot']['id']}_{edge['intersection']['id']}" in prov['used']:
+                        prov['activity'].pop(prov['used'][f"_:uMerge_{edge['left_lot']['id']}_{edge['intersection']['id']}"]['prov:activity'], None)
+                    if f"_:uSplit_{edge['left_lot']['id']}" in prov['used']:
+                        prov['activity'].pop(prov['used'][f"_:uSplit_{edge['left_lot']['id']}"]['prov:activity'], None)
+                    prov['used'].pop(f"_:uMerge_{edge['left_lot']['id']}_{edge['intersection']['id']}", None)
+                    prov['used'].pop(f"_:uSplit_{edge['left_lot']['id']}", None)
 
-            if edge['right_lot']['YearBBL'] in rearranges[str(edge['right_lot']['Year']-1) + str(edge['right_lot']['Year'])]:
-                wGB = f"_:wGBRearrange_{edge['right_lot']['id']}"
-                wGBdict = {}
-                wGBdict["prov:entity"] = "prov:" + str(edge['right_lot']['YearBBL'])
-                wGBdict["prov:activity"] = "prov:Rearrange"  + str(rearranges[str(edge['right_lot']['Year']-1) + str(edge['right_lot']['Year'])][edge['right_lot']['YearBBL']])
-                prov['wasGeneratedBy'][wGB] = wGBdict
-                
-                if f"_:wGBMerge_{edge['right_lot']['id']}" in prov['wasGeneratedBy']:
-                    prov['activity'].pop(prov['wasGeneratedBy'][f"_:wGBMerge_{edge['right_lot']['id']}"]['prov:activity'], None)
-                if f"_:wGBSplit_{edge['right_lot']['id']}_{edge['intersection']['id']}" in prov['wasGeneratedBy']:
-                    prov['activity'].pop(prov['wasGeneratedBy'][f"_:wGBSplit_{edge['right_lot']['id']}_{edge['intersection']['id']}"]['prov:activity'], None)
-                prov['wasGeneratedBy'].pop(f"_:wGBMerge_{edge['right_lot']['id']}", None)
-                prov['wasGeneratedBy'].pop(f"_:wGBSplit_{edge['right_lot']['id']}_{edge['intersection']['id']}", None)
+                if edge['right_lot']['YearBBL'] in rearranges[str(edge['right_lot']['Year']-1) + str(edge['right_lot']['Year'])]:
+                    wGB = f"_:wGBRearrange_{edge['right_lot']['id']}"
+                    wGBdict = {}
+                    wGBdict["prov:entity"] = "prov:" + str(edge['right_lot']['YearBBL'])
+                    wGBdict["prov:activity"] = "prov:Rearrange"  + str(rearranges[str(edge['right_lot']['Year']-1) + str(edge['right_lot']['Year'])][edge['right_lot']['YearBBL']])
+                    prov['wasGeneratedBy'][wGB] = wGBdict
+                    
+                    if f"_:wGBMerge_{edge['right_lot']['id']}" in prov['wasGeneratedBy']:
+                        prov['activity'].pop(prov['wasGeneratedBy'][f"_:wGBMerge_{edge['right_lot']['id']}"]['prov:activity'], None)
+                    if f"_:wGBSplit_{edge['right_lot']['id']}_{edge['intersection']['id']}" in prov['wasGeneratedBy']:
+                        prov['activity'].pop(prov['wasGeneratedBy'][f"_:wGBSplit_{edge['right_lot']['id']}_{edge['intersection']['id']}"]['prov:activity'], None)
+                    prov['wasGeneratedBy'].pop(f"_:wGBMerge_{edge['right_lot']['id']}", None)
+                    prov['wasGeneratedBy'].pop(f"_:wGBSplit_{edge['right_lot']['id']}_{edge['intersection']['id']}", None)
         
             
             ##maintain    
@@ -123,11 +124,12 @@ class ProvService:
                 udict["prov:entity"] = "prov:" + str(edge['left_lot']['YearBBL'])
                 prov['used'][u] = udict       
         
-        for year in rearranges:
-            for rearrange in rearranges[year]:
-                if with_attributes:
-                    prov['activity']["prov:Rearrange" + str(rearranges[year][rearrange])] = {"prov:Year": int(year[:-4])}
-                else:    
-                    prov['activity']["prov:Rearrange" + str(rearranges[year][rearrange])] = {}
-            
+        if(with_rearranges):
+            for year in rearranges:
+                for rearrange in rearranges[year]:
+                    if with_attributes:
+                        prov['activity']["prov:Rearrange" + str(rearranges[year][rearrange])] = {"prov:Year": int(year[:-4])}
+                    else:    
+                        prov['activity']["prov:Rearrange" + str(rearranges[year][rearrange])] = {}
+                
         return prov

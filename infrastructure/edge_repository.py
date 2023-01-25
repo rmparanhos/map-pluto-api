@@ -11,12 +11,12 @@ class EdgeRepository:
 
     def get_edges_by_block(self, year: int, block: int):
         query_string = f"MATCH (n:Lot{year} {{Block:\"{block}\"}})-[r:INTERSECTION]->(m) RETURN n,r,m"
-    
+        print(query_string)
         return self.neo4j_conn.query(query_string, db='neo4j')
     
-    def get_edges_by_blocklist(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+    def get_edges_by_blocklist(self, year: int, initial_block: int, end_block: int, borough: str, filter_list: List[Filter]):
         block_list = range(initial_block, end_block+1)
-        query_string = f"MATCH (n:Lot{year})-[r:INTERSECTION]->(m) WHERE n.Block in {[block for block in block_list]}"
+        query_string = f"MATCH (n:Lot{year})-[r:INTERSECTION]->(m) WHERE n.Block in {[block for block in block_list]} AND n.Borough = '{borough}' "
         for filter in filter_list:
             if filter.attribute in self.intersect_attribute:
                 query_string += f" AND r.{filter.attribute} {filter.operand} {filter.value}"

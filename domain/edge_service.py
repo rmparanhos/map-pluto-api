@@ -11,12 +11,12 @@ class EdgeService:
         self.intersect_attribute = ['area','areaA','areaB']
         pass
 
-    def get_edges_by_blocklist(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+    def get_edges_by_blocklist(self, year: int, initial_block: int, end_block: int, borough: str, filter_list: List[Filter]):
     
         edges = []
         left_edges = []
         right_edges = []
-        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, filter_list):
+        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, borough, filter_list):
             left_lot = {"id" : record['r'].nodes[0].id}
             left_edges.append(record['r'].nodes[0].id)
 
@@ -44,12 +44,12 @@ class EdgeService:
             edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
         return edges
 
-    def get_splits(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+    def get_splits(self, year: int, initial_block: int, end_block: int, borough: str, filter_list: List[Filter]):
 
         edges = []
         left_edges = []
         right_edges = []
-        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, filter_list):
+        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, borough, filter_list):
             left_lot = {"id" : record['r'].nodes[0].id}
             left_edges.append(record['r'].nodes[0].id)
 
@@ -81,12 +81,12 @@ class EdgeService:
                 response.append(edge)
         return response
 
-    def get_merges(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+    def get_merges(self, year: int, initial_block: int, end_block: int, borough: str, filter_list: List[Filter]):
        
         edges = []
         left_edges = []
         right_edges = []
-        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, filter_list):
+        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, borough, filter_list):
             left_lot = {"id" : record['r'].nodes[0].id}
             left_edges.append(record['r'].nodes[0].id)
 
@@ -118,13 +118,13 @@ class EdgeService:
                 response.append(edge)
         return response 
 
-    def get_rearranges(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]):
+    def get_rearranges(self, year: int, initial_block: int, end_block: int, borough: str,filter_list: List[Filter]):
          
         edges = []
         left_edges = []
         right_edges = []
         #TODO FILTRO QUEBRADO NO REARRENGE, POIS O FILTRO FAZ COM QUE ELE NAO SE ENCAIXE MAIS NO CRITERIO DE REARRANGE
-        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, []): #filter_list):
+        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, borough, []): #filter_list):
             left_lot = {"id" : record['r'].nodes[0].id}
             left_edges.append(record['r'].nodes[0].id)
 
@@ -248,11 +248,11 @@ class EdgeService:
         return edges     
       
               
-    def get_rearranges_ids(self, year: int, initial_block: int, end_block: int, filter_list: List[Filter]): 
+    def get_rearranges_ids(self, year: int, initial_block: int, end_block: int, borough: str, filter_list: List[Filter]): 
         edges = []
         left_edges = []
         right_edges = []
-        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, []): #filter_list):
+        for record in self.edge_repository.get_edges_by_blocklist(year, initial_block, end_block, borough, []): #filter_list):
             left_lot = {"id" : record['r'].nodes[0].id}
             left_edges.append(record['r'].nodes[0].id)
 

@@ -87,8 +87,8 @@ def get_rearranges(initial_year: int, end_year: int, initial_block: int, end_blo
 
 @app.post("/edges_as_prov/{initial_year}/{end_year}/{initial_block}/{end_block}/{borough}/{with_attributes}/{with_rearranges}")
 def get_edges_as_prov(initial_year: int, end_year: int, initial_block: int, end_block: int, borough: str, with_attributes: bool, with_rearranges: bool, filter_list: List[Filter]):
-    # Esta faltando o caso base quando o ano inicial é igual o ano final
-    # if initial_year == end_year or initial_year+1 == end_year: return edge_service.get_edges_by_blocklist(initial_year, initial_block, end_block, filter_list)
+    if initial_year == end_year: end_year += 1
+    
     tic_master = time.perf_counter()
     
     tic_edges = time.perf_counter()

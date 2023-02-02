@@ -286,14 +286,14 @@ class EdgeService:
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
         
         #voltando nos splits e merges para capturar toda a participacao do rearranjo
-        splits = self.get_splits(year, initial_block, end_block, [])
+        splits = self.get_splits(year, initial_block, end_block, borough, [])
         for edge in splits:
             if (edge['left_lot']['YearBBL'] in rearrange_bbl or edge['right_lot']['YearBBL'] in rearrange_bbl):
                 rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
                 rearrange_bbl.append(edge['left_lot']['YearBBL'])
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
 
-        merges = self.get_merges(year, initial_block, end_block, [])
+        merges = self.get_merges(year, initial_block, end_block, borough, [])
         for edge in merges:
             if (edge['left_lot']['YearBBL'] in rearrange_bbl or edge['right_lot']['YearBBL'] in rearrange_bbl):
                 rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)

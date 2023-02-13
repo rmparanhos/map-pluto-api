@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import datetime
 import time
+import json
 
 app = FastAPI()
 
@@ -43,7 +44,8 @@ def get_splits(initial_year: int, end_year: int, initial_block: int, end_block: 
     resp = []
     for year in range(initial_year, end_year):
         t = datetime.datetime.now()
-        resp = resp + edge_service.get_splits(year, initial_block, end_block, borough, filter_list)
+        x = edge_service.get_splits(year, initial_block, end_block, borough, filter_list)
+        resp = resp + x
         print(datetime.datetime.now()-t)
     
     bbls = []
@@ -59,13 +61,14 @@ def get_merges(initial_year: int, end_year: int, initial_block: int, end_block: 
     
     resp = []
     for year in range(initial_year, end_year):
-        resp = resp + edge_service.get_merges(year, initial_block, end_block, borough, filter_list)
-    
+        x = edge_service.get_merges(year, initial_block, end_block, borough, filter_list)
+        resp = resp + x
+        
     bbls = []
     for edge in resp:     
         if edge['left_lot']['BBL'] not in bbls: bbls.append(edge['left_lot']['BBL'])
         if edge['right_lot']['BBL'] not in bbls: bbls.append(edge['right_lot']['BBL'])
-    #return resp
+    
     return edge_service.get_edges_by_bbl(bbls,initial_year,end_year)
 
 
@@ -75,13 +78,14 @@ def get_rearranges(initial_year: int, end_year: int, initial_block: int, end_blo
     
     resp = []
     for year in range(initial_year, end_year):
-        resp = resp + edge_service.get_rearranges(year, initial_block, end_block, borough, filter_list)
+        x = edge_service.get_rearranges(year, initial_block, end_block, borough, filter_list)
+        resp = resp + x
 
     bbls = []
     for edge in resp:     
         if edge['left_lot']['BBL'] not in bbls: bbls.append(edge['left_lot']['BBL'])
         if edge['right_lot']['BBL'] not in bbls: bbls.append(edge['right_lot']['BBL'])
-
+    
     return edge_service.get_edges_by_bbl(bbls,initial_year,end_year)
 
 
@@ -120,5 +124,34 @@ def get_edges_as_prov(initial_year: int, end_year: int, initial_block: int, end_
     print(f"Took {time.perf_counter()- tic_conversion:0.4f} seconds conversion")
     
     print(f"Took {time.perf_counter()- tic_master:0.4f} seconds")
-   
+    with open('output.json', 'w') as outfile:
+        json.dump(x, outfile)
     return x
+
+@app.get("/conta")
+def count_inc_out_edges():
+    x = get_edges_as_prov(2010, 2011, 1, 2600, 'MN', False, False, [])
+    exit_dict = {}
+    inc_dict = {}
+    for key in x['activity'].keys():
+        exit_dict[key] = 0
+        inc_dict[key] = 0
+    for used in x['used'].keys():
+        count = exit_dict[x['used'][used]['prov:activity']]
+        exit_dict[x['used'][used]['prov:activity']] = count + 1
+    for wgb in x['wasGeneratedBy'].keys():
+        count = inc_dict[x['wasGeneratedBy'][wgb]['prov:activity']]
+        inc_dict[x['wasGeneratedBy'][wgb]['prov:activity']] = count + 1
+    
+    res = {}
+    for key in x['activity'].keys():
+        if 'Split' in key:
+            count = res.get(f"Split_{exit_dict[key]}-{inc_dict[key]}", 0)
+            res[f'Split_{exit_dict[key]}-{inc_dict[key]}'] = count + 1
+        if 'Merge'in key:
+            count = res.get(f'Merge_{exit_dict[key]}-{inc_dict[key]}', 0)
+            res[f'Merge_{exit_dict[key]}-{inc_dict[key]}'] = count + 1
+        if'Rearrange'in key:
+            count = res.get(f'Rearrange_{exit_dict[key]}-{inc_dict[key]}', 0)
+            res[f'Rearrange_{exit_dict[key]}-{inc_dict[key]}'] = count + 1
+    print(res)        

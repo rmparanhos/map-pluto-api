@@ -158,22 +158,25 @@ class EdgeService:
                 edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
                 edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
                 if(self.filter_edge(edge,filter_list)):
-                    rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                    #rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                    rearrange_edges.append(edge)
+                
                 rearrange_bbl.append(edge['left_lot']['YearBBL'])
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
-
+        print(len(rearrange_edges))
         #voltando nos splits e merges para capturar toda a participacao do rearranjo
-        splits = self.get_splits(year, initial_block, end_block, [])
+        splits = self.get_splits(year, initial_block, end_block, borough, [])
         for edge in splits:
             if (edge['left_lot']['YearBBL'] in rearrange_bbl or edge['right_lot']['YearBBL'] in rearrange_bbl):
-                rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                #rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                rearrange_edges.append(edge)
                 rearrange_bbl.append(edge['left_lot']['YearBBL'])
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
-
-        merges = self.get_merges(year, initial_block, end_block, [])
+        merges = self.get_merges(year, initial_block, end_block, borough, [])
         for edge in merges:
             if (edge['left_lot']['YearBBL'] in rearrange_bbl or edge['right_lot']['YearBBL'] in rearrange_bbl):
-                rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                #rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                rearrange_edges.append(edge)
                 rearrange_bbl.append(edge['left_lot']['YearBBL'])
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
         return rearrange_edges
@@ -186,7 +189,7 @@ class EdgeService:
             if(edge_to_insert['left_lot']['Block'] < edge['left_lot']['Block']):
                 resp.append(edge_to_insert)
                 inserted = True
-            resp.append(edge)    
+            resp.append(edge)
         if not inserted:
             resp.append(edge_to_insert)
         return resp

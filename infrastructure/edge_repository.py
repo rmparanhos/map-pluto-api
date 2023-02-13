@@ -25,7 +25,7 @@ class EdgeRepository:
             else: 
                 query_string += f" AND (n.{filter.attribute} {filter.operand} '{filter.value}' OR m.{filter.attribute} {filter.operand} '{filter.value}')"
         query_string += " RETURN n,r,m"
-        print(query_string)
+        #print(query_string)
         return self.neo4j_conn.query(query_string, db='neo4j')
 
     def get_edges_by_bbl(self, bbl_list: List[int], initial_year: int, end_year: int):

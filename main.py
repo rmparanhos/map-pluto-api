@@ -117,6 +117,7 @@ def get_edges_as_prov(initial_year: int, end_year: int, initial_block: int, end_
     rearranges_ids = {}
     for year in range(initial_year, end_year):
         rearranges_ids[str(year)+str(year+1)] = edge_service.get_rearranges_ids(year, initial_block, end_block, borough, filter_list)
+        print(rearranges_ids)
     print(f"Took {time.perf_counter()- tic_rearrange:0.4f} seconds rearrange")
     
     tic_conversion = time.perf_counter()
@@ -130,7 +131,7 @@ def get_edges_as_prov(initial_year: int, end_year: int, initial_block: int, end_
 
 @app.get("/conta")
 def count_inc_out_edges():
-    x = get_edges_as_prov(2010, 2011, 1, 2600, 'MN', False, False, [])
+    x = get_edges_as_prov(2012, 2013, 1, 2600, 'MN', False, True, [])
     exit_dict = {}
     inc_dict = {}
     for key in x['activity'].keys():
@@ -140,6 +141,8 @@ def count_inc_out_edges():
         count = exit_dict[x['used'][used]['prov:activity']]
         exit_dict[x['used'][used]['prov:activity']] = count + 1
     for wgb in x['wasGeneratedBy'].keys():
+        if('Rearrange' in x['wasGeneratedBy'][wgb]['prov:activity']):
+            print(x['wasGeneratedBy'][wgb]['prov:entity'])
         count = inc_dict[x['wasGeneratedBy'][wgb]['prov:activity']]
         inc_dict[x['wasGeneratedBy'][wgb]['prov:activity']] = count + 1
     
@@ -151,7 +154,7 @@ def count_inc_out_edges():
         if 'Merge'in key:
             count = res.get(f'Merge_{exit_dict[key]}-{inc_dict[key]}', 0)
             res[f'Merge_{exit_dict[key]}-{inc_dict[key]}'] = count + 1
-        if'Rearrange'in key:
+        if 'Rearrange'in key:
             count = res.get(f'Rearrange_{exit_dict[key]}-{inc_dict[key]}', 0)
             res[f'Rearrange_{exit_dict[key]}-{inc_dict[key]}'] = count + 1
     print(res)        

@@ -284,7 +284,8 @@ class EdgeService:
                 edge['left_lot']['exit_edges'] = dict_left_edges[edge['left_lot']['id']]
                 edge['right_lot']['incoming_edges'] = dict_right_edges[edge['right_lot']['id']]
                 if(self.filter_edge(edge,filter_list)):
-                    rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                    #rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                    rearrange_edges.append(edge)
                 rearrange_bbl.append(edge['left_lot']['YearBBL'])
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
         
@@ -292,27 +293,54 @@ class EdgeService:
         splits = self.get_splits(year, initial_block, end_block, borough, [])
         for edge in splits:
             if (edge['left_lot']['YearBBL'] in rearrange_bbl or edge['right_lot']['YearBBL'] in rearrange_bbl):
-                rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                #rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                rearrange_edges.append(edge)
                 rearrange_bbl.append(edge['left_lot']['YearBBL'])
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
 
         merges = self.get_merges(year, initial_block, end_block, borough, [])
         for edge in merges:
             if (edge['left_lot']['YearBBL'] in rearrange_bbl or edge['right_lot']['YearBBL'] in rearrange_bbl):
-                rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                #rearrange_edges = self.insert_edge_ordered(rearrange_edges, edge)
+                rearrange_edges.append(edge)
                 rearrange_bbl.append(edge['left_lot']['YearBBL'])
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
         
         rearrange_ids = {}
+
         for item in rearrange_edges:
+            if item['left_lot']['YearBBL'] not in rearrange_ids:
+                rearrange_ids[item['left_lot']['YearBBL']] = item['intersection']['id']
+            if item['right_lot']['YearBBL'] not in rearrange_ids:
+                rearrange_ids[item['right_lot']['YearBBL']] = item['intersection']['id']
+            print(rearrange_ids)
+            for aux in rearrange_edges:
+                if aux['left_lot']['YearBBL'] in rearrange_ids:
+                    if aux['right_lot']['YearBBL'] in rearrange_ids:
+                        rearrange_ids[aux['left_lot']['YearBBL']] = rearrange_ids[aux['right_lot']['YearBBL']]
+                    else:
+                        rearrange_ids[aux['right_lot']['YearBBL']] = rearrange_ids[aux['left_lot']['YearBBL']]
+                if aux['right_lot']['YearBBL'] in rearrange_ids:
+                    if aux['left_lot']['YearBBL'] in rearrange_ids:
+                        rearrange_ids[aux['right_lot']['YearBBL']] = rearrange_ids[aux['left_lot']['YearBBL']]
+                    else:
+                        rearrange_ids[aux['left_lot']['YearBBL']] = rearrange_ids[aux['right_lot']['YearBBL']]
+            continue
+                
             if item['left_lot']['YearBBL'] in rearrange_ids:
-               rearrange_ids[item['right_lot']['YearBBL']] = rearrange_ids[item['left_lot']['YearBBL']]
+                if item['right_lot']['YearBBL'] in rearrange_ids:
+                    rearrange_ids[item['left_lot']['YearBBL']] = rearrange_ids[item['right_lot']['YearBBL']]
+                else:
+                    rearrange_ids[item['right_lot']['YearBBL']] = rearrange_ids[item['left_lot']['YearBBL']]
             if item['right_lot']['YearBBL'] in rearrange_ids:
-               rearrange_ids[item['left_lot']['YearBBL']] = rearrange_ids[item['right_lot']['YearBBL']]
-               continue
+                if item['left_lot']['YearBBL'] in rearrange_ids:
+                    rearrange_ids[item['right_lot']['YearBBL']] = rearrange_ids[item['left_lot']['YearBBL']]
+                else:
+                    rearrange_ids[item['left_lot']['YearBBL']] = rearrange_ids[item['right_lot']['YearBBL']]
+                continue
             rearrange_ids[item['left_lot']['YearBBL']] = item['intersection']['id']
             rearrange_ids[item['right_lot']['YearBBL']] = item['intersection']['id']
-            
+
         return rearrange_ids
     
     

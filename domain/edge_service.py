@@ -313,7 +313,6 @@ class EdgeService:
                 rearrange_ids[item['left_lot']['YearBBL']] = item['intersection']['id']
             if item['right_lot']['YearBBL'] not in rearrange_ids:
                 rearrange_ids[item['right_lot']['YearBBL']] = item['intersection']['id']
-            print(rearrange_ids)
             for aux in rearrange_edges:
                 if aux['left_lot']['YearBBL'] in rearrange_ids:
                     if aux['right_lot']['YearBBL'] in rearrange_ids:

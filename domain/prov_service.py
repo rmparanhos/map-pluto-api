@@ -27,6 +27,7 @@ class ProvService:
                 if "prov:Merge" + str(merge['right_lot']['id']) not in prov['activity']:
                     prov['activity']["prov:Merge" + str(merge['right_lot']['id'])] = {"prov:Year": merge['left_lot']['Year']}
                 #prov['activity']["prov:Merge" + str(merge['right_lot']['id'])]["prov:areaA_" + str(merge['right_lot']['YearBBL'])] = merge['intersection']['areaA']
+                prov['activity']["prov:Merge" + str(merge['right_lot']['id'])]["prov:area"] = merge['intersection']['area']
                 prov['activity']["prov:Merge" + str(merge['right_lot']['id'])]["prov:areaB_" + str(merge['left_lot']['YearBBL'])] = merge['intersection']['areaB']
             else:
                 prov['activity']["prov:Merge" + str(merge['right_lot']['id'])] = {}
@@ -40,6 +41,7 @@ class ProvService:
                 if "prov:Split" + str(split['left_lot']['id']) not in prov['activity']:
                     prov['activity']["prov:Split" + str(split['left_lot']['id'])] = {"prov:Year": split['left_lot']['Year']}
                 #prov['activity']["prov:Split" + str(split['left_lot']['id'])]["prov:areaB_" + str(split['left_lot']['YearBBL'])] = split['intersection']['areaB']
+                prov['activity']["prov:Split" + str(split['left_lot']['id'])]["prov:area"] = split['intersection']['area']
                 prov['activity']["prov:Split" + str(split['left_lot']['id'])]["prov:areaA_" + str(split['right_lot']['YearBBL'])] = split['intersection']['areaA']
             else:
                 prov['activity']["prov:Split" + str(split['left_lot']['id'])] = {}

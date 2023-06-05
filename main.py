@@ -29,7 +29,7 @@ prov_service = ProvService()
 def hello_world():
     return {"Hello": "World"}
 
-@app.post("/edges/{initial_year}/{end_year}/{initial_block}/{end_block}")
+@app.post("/edges/{initial_year}/{end_year}/{initial_block}/{end_block}/{borough}")
 def get_edges(initial_year: int, end_year: int, initial_block: int, end_block: int, borough: str, filter_list: List[Filter]):
     if initial_year == end_year or initial_year+1 == end_year: return edge_service.get_edges_by_blocklist(initial_year, initial_block, end_block, borough, filter_list)
     
@@ -38,7 +38,7 @@ def get_edges(initial_year: int, end_year: int, initial_block: int, end_block: i
         resp = resp + edge_service.get_edges_by_blocklist(year, initial_block, end_block, borough, filter_list)
     return resp
 
-@app.post("/splits/{initial_year}/{end_year}/{initial_block}/{end_block}")
+@app.post("/splits/{initial_year}/{end_year}/{initial_block}/{end_block}/{borough}")
 def get_splits(initial_year: int, end_year: int, initial_block: int, end_block: int, borough: str, filter_list: List[Filter]):
     if initial_year == end_year or initial_year+1 == end_year: return edge_service.get_splits(initial_year, initial_block, end_block, borough, filter_list)
     

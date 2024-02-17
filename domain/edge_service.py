@@ -163,7 +163,6 @@ class EdgeService:
                 
                 rearrange_bbl.append(edge['left_lot']['YearBBL'])
                 rearrange_bbl.append(edge['right_lot']['YearBBL'])
-        print(len(rearrange_edges))
         #voltando nos splits e merges para capturar toda a participacao do rearranjo
         splits = self.get_splits(year, initial_block, end_block, borough, [])
         for edge in splits:
@@ -324,21 +323,6 @@ class EdgeService:
                         rearrange_ids[aux['right_lot']['YearBBL']] = rearrange_ids[aux['left_lot']['YearBBL']]
                     else:
                         rearrange_ids[aux['left_lot']['YearBBL']] = rearrange_ids[aux['right_lot']['YearBBL']]
-            continue
-                
-            if item['left_lot']['YearBBL'] in rearrange_ids:
-                if item['right_lot']['YearBBL'] in rearrange_ids:
-                    rearrange_ids[item['left_lot']['YearBBL']] = rearrange_ids[item['right_lot']['YearBBL']]
-                else:
-                    rearrange_ids[item['right_lot']['YearBBL']] = rearrange_ids[item['left_lot']['YearBBL']]
-            if item['right_lot']['YearBBL'] in rearrange_ids:
-                if item['left_lot']['YearBBL'] in rearrange_ids:
-                    rearrange_ids[item['right_lot']['YearBBL']] = rearrange_ids[item['left_lot']['YearBBL']]
-                else:
-                    rearrange_ids[item['left_lot']['YearBBL']] = rearrange_ids[item['right_lot']['YearBBL']]
-                continue
-            rearrange_ids[item['left_lot']['YearBBL']] = item['intersection']['id']
-            rearrange_ids[item['right_lot']['YearBBL']] = item['intersection']['id']
 
         return rearrange_ids
     
